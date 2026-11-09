@@ -1,0 +1,14 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Silhueta da Cabeça e Nuca -->
+  <path d="M12 8C12 5 15 4 20 4C27 4 32 8 32 14C32 20 30 24 30 30C30 36 34 40 38 42" stroke="#D0DFFA" stroke-width="2" stroke-linecap="round"/>
+  <!-- Curvatura Cervical C1-C6 -->
+  <rect x="15" y="10" width="10" height="3.5" rx="1.5" fill="#182A65"/>
+  <rect x="16" y="15" width="10" height="3.5" rx="1.5" fill="#182A65"/>
+  <rect x="17" y="20" width="11" height="4" rx="1.5" fill="#243F97"/>
+  <!-- Ponto de Compressão Cervical C5-C6 -->
+  <rect x="17.5" y="26" width="11" height="4" rx="1.5" fill="#182A65"/>
+  <circle cx="29.5" cy="28" r="2.5" fill="#E52329"/>
+  <!-- C7 / Base -->
+  <rect x="16" y="32" width="13" height="4.5" rx="1.5" fill="#182A65"/>
+  <rect x="14" y="38" width="16" height="5" rx="2" fill="#182A65" opacity="0.8"/>
+</svg>

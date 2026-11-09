@@ -1,0 +1,11 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Contorno Externo do Disco em Abaulamento -->
+  <ellipse cx="24" cy="24" rx="19" ry="14" fill="#F0F5FF" stroke="#243F97" stroke-width="2.5"/>
+  <!-- Camadas Anulares Fibrosas -->
+  <ellipse cx="24" cy="24" rx="14" ry="10" stroke="#93C5FD" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <ellipse cx="24" cy="24" rx="9" ry="6" fill="#E2ECFC" stroke="#243F97" stroke-width="1.5"/>
+  <!-- Núcleo Pulposo Central -->
+  <ellipse cx="24" cy="24" rx="5" ry="3.5" fill="#182A65"/>
+  <!-- Indicadores de Expansão Radial Concêntrica -->
+  <path d="M43 24H46M5 24H2M24 7V4M24 44V41" stroke="#243F97" stroke-width="2" stroke-linecap="round"/>
+</svg>

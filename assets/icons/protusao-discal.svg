@@ -1,0 +1,12 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Corpo do Disco com Protusão Focal para trás -->
+  <path d="M10 24C10 16 16 11 24 11C32 11 38 16 38 24C38 29 36 32 35 34C33 38 29 40 24 40C19 40 15 38 13 34C12 32 10 29 10 24Z" fill="#F0F5FF" stroke="#182A65" stroke-width="2"/>
+  <!-- Anéis Internos -->
+  <ellipse cx="24" cy="23" rx="10" ry="7" stroke="#93C5FD" stroke-width="1.5"/>
+  <!-- Núcleo deslocando focalmente para a borda -->
+  <path d="M22 23C22 20 26 20 26 23C26 27 27 34 24 36C21 34 22 27 22 23Z" fill="#243F97"/>
+  <!-- Ápice Focal da Protusão (Alerta Cirúrgico Sutil) -->
+  <circle cx="24" cy="38" r="2.5" fill="#E52329"/>
+  <!-- Canal Medular Posterior -->
+  <path d="M14 42C19 45 29 45 34 42" stroke="#182A65" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"/>
+</svg>
