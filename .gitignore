@@ -3,3 +3,6 @@ node_modules
 *.log
 preview-*.png
 test-*.png
+
+.vercel
+.env*
