@@ -298,7 +298,7 @@ const fs = require('fs');
     // 4.5 Auditoria de Imagens Não Duplicadas (Hero vs Founder Spotlight)
     console.log('4.5 Validando Diferenciação de Fotos (Hero vs Founder Spotlight)...');
     const photosCheck = await page.evaluate(() => {
-      const heroImg = document.querySelector('.hero-visual-column img');
+      const heroImg = document.querySelector('.hero-panoramic-frame img');
       const founderImg = document.querySelector('.founder-spotlight-card img');
       const heroSrc = heroImg ? (heroImg.getAttribute('src') || '') : '';
       const founderSrc = founderImg ? (founderImg.getAttribute('src') || '') : '';
@@ -342,187 +342,257 @@ const fs = require('fs');
       throw new Error('Dobras ausentes na Landing Page: ' + missingDobras.join(', '));
     }
 
-    // 5.1 Validação do Hero Editorial Claro (#F9FAFB) e Nivelamento de Altura das Colunas
-    console.log('5.1 Validando Hero Editorial Claro e Nivelamento Geométrico...');
-    const heroBgAudit = await page.evaluate(() => {
+    // 5.1 Validação do Hero Editorial Centralizado Claro (#F9FAFB) e Vitrine Panorâmica
+    console.log('5.1 Validando Hero Editorial Centralizado e Vitrine Panorâmica...');
+    const heroAudit = await page.evaluate(() => {
       const hero = document.querySelector('.hero-block');
+      const centerStack = document.querySelector('.hero-center-stack');
       const style = window.getComputedStyle(hero);
       const bg = style.backgroundColor;
-      // Não pode ser Dark Navy (#061A3B, #030E22 ou similar rgb(6, 26, 59))
       const isDarkNavy = /rgb\(6,\s*26,\s*59\)|rgb\(3,\s*14,\s*34\)|#061a3b|#030e22/i.test(bg);
-      return { bg, isDarkNavy };
+
+      const titleEl = document.querySelector('.hero-title');
+      const titleText = titleEl ? titleEl.innerText.trim() : '';
+      const hasCorrectTitle = titleText.includes('Sua Coluna Já Avisou: Não Espere Travar para Cuidar');
+      
+      const trustBadge = document.querySelector('.hero-trust-badge');
+      const trustText = trustBadge ? trustBadge.innerText.trim() : '';
+      const hasTrustBadge = /atendimento com fisioterapeuta especializado em/i.test(trustText) && /arauc[aá]ria/i.test(trustText);
+
+      const panoramicFrame = document.querySelector('.hero-panoramic-frame');
+      const panoramicImg = panoramicFrame ? panoramicFrame.querySelector('img') : null;
+      const panoramicCaption = panoramicFrame ? panoramicFrame.querySelector('.hero-panoramic-caption') : null;
+      const hasPanoramic = !!panoramicFrame && !!panoramicImg && (panoramicImg.getAttribute('src') || '').includes('hero-orientacao-clinica.jpg');
+      const hasCaption = panoramicCaption ? panoramicCaption.innerText.includes('Avaliação presencial detalhada e cuidado conservador individualizado.') : false;
+
+      const hasOldTwoCol = !!document.querySelector('.hero-grid') || !!document.querySelector('.hero-copy-column') || !!document.querySelector('.hero-visual-column');
+      const hasThreeNumbers = !!document.querySelector('.hero-credentials-strip') || !!document.querySelector('.hero-stats-row');
+
+      const highlight = document.querySelector('.hero-title-highlight');
+      const highlightText = highlight ? highlight.innerText.trim() : '';
+      const hasHighlight = highlightText === 'Não Espere Travar para Cuidar';
+
+      const stackStyle = centerStack ? window.getComputedStyle(centerStack) : null;
+      const isCentered = stackStyle ? stackStyle.textAlign === 'center' : false;
+
+      const subtitle = document.querySelector('.hero-subtitle');
+      const subtitleStyle = subtitle ? window.getComputedStyle(subtitle) : null;
+      const hasSubtitleMaxW = subtitleStyle ? (parseFloat(subtitleStyle.maxWidth) <= 680) : false;
+
+      return {
+        bg,
+        isDarkNavy,
+        hasCenterStack: !!centerStack,
+        isCentered,
+        titleText,
+        hasCorrectTitle,
+        hasHighlight,
+        hasSubtitleMaxW,
+        trustText,
+        hasTrustBadge,
+        hasPanoramic,
+        hasCaption,
+        hasOldTwoCol,
+        hasThreeNumbers
+      };
     });
-    console.log('Cor de fundo computada do Hero:', heroBgAudit);
-    if (heroBgAudit.isDarkNavy) {
+    console.log('Auditoria do Hero Editorial Centralizado:', heroAudit);
+    if (heroAudit.isDarkNavy) {
       throw new Error('VIOLAÇÃO DE DESIGN: Hero ainda utiliza Dark Navy escuro. O Hero deve ser claro e respirado (#F9FAFB).');
     }
+    if (!heroAudit.hasCenterStack || !heroAudit.isCentered) {
+      throw new Error('Hero deve usar stack centralizado .hero-center-stack com text-align: center.');
+    }
+    if (!heroAudit.hasCorrectTitle) {
+      throw new Error(`Título do Hero incorreto. Atual: "${heroAudit.titleText}"`);
+    }
+    if (!heroAudit.hasHighlight) {
+      throw new Error('Título do Hero deve destacar "Não Espere Travar para Cuidar" via .hero-title-highlight.');
+    }
+    if (!heroAudit.hasSubtitleMaxW) {
+      throw new Error('Subtítulo do Hero deve ter max-width em torno de 660px.');
+    }
+    if (!heroAudit.hasTrustBadge) {
+      throw new Error('Micro-selo de confiança do Hero ausente ou não contém "Atendimento com fisioterapeuta especializado em Araucária".');
+    }
+    if (!heroAudit.hasPanoramic || !heroAudit.hasCaption) {
+      throw new Error('Vitrine panorâmica do Hero ausente ou sem imagem/legenda correta.');
+    }
+    if (heroAudit.hasOldTwoCol) {
+      throw new Error('VIOLAÇÃO: O Hero ainda contém estrutura de 2 colunas (.hero-grid/.hero-copy-column/.hero-visual-column).');
+    }
+    if (heroAudit.hasThreeNumbers) {
+      throw new Error('VIOLAÇÃO: O Hero ainda contém os 3 números embaixo (.hero-credentials-strip).');
+    }
 
-    // Teste de alinhamento geométrico de altura entre coluna esquerda e direita nos breakpoints
-    const testBreakpoints = [1440, 1200, 1024, 960, 910];
-    for (const bp of testBreakpoints) {
-      await page.setViewport({ width: bp, height: 900 });
-      const diff = await page.evaluate(() => {
-        const left = document.querySelector('.hero-copy-column');
-        const right = document.querySelector('.hero-visual-column');
-        return Math.abs(left.offsetHeight - right.offsetHeight);
+    // 5.2 Teste do Repeater de Sintomas e Sinais de Alerta (4 Cards Enxutos)
+    console.log('5.2 Validando Repeater de Sintomas da Coluna...');
+    const symptomsAudit = await page.evaluate(() => {
+      const grid = document.querySelector('.symptoms-repeater-grid');
+      const cards = Array.from(document.querySelectorAll('.symptom-visual-card'));
+      const ctaBtn = document.querySelector('.btn-symptom-cta');
+      const ctaText = ctaBtn ? ctaBtn.innerText.trim() : '';
+
+      const expectedTitles = [
+        'Travamento ao Levantar',
+        'Dificuldade ao Amarrar o Sapato',
+        'Desconforto ao Ficar Sentado',
+        'Formigamento Descendo para a Perna'
+      ];
+
+      const expectedDescriptions = [
+        'Fisgada na lombar ao sair da cama ou cadeira.',
+        'Rigidez ao flexionar o corpo.',
+        'Queimação após horas de trabalho ou trânsito.',
+        'Sinal de alerta do nervo ciático.'
+      ];
+
+      const cardDetails = cards.map(c => {
+        const badge = c.querySelector('.symptom-alert-badge');
+        const icon = c.querySelector('.symptom-icon-wrap svg');
+        const title = c.querySelector('.symptom-card-title');
+        const desc = c.querySelector('.symptom-card-desc');
+        return {
+          hasBadge: badge ? (badge.textContent.trim() === 'Sinal de Alerta' || /sinal de alerta/i.test(badge.innerText.trim())) : false,
+          hasIcon: !!icon,
+          title: title ? title.innerText.trim() : '',
+          desc: desc ? desc.innerText.trim() : ''
+        };
       });
-      console.log(`Diferença de altura entre colunas do Hero em ${bp}px: ${diff}px`);
-      if (diff > 15) {
-        throw new Error(`Falha de alinhamento no Hero: diferença de altura entre colunas em ${bp}px é de ${diff}px (máximo permitido: 15px).`);
-      }
-    }
 
-    // Restaura viewport desktop 1440
-    await page.setViewport({ width: 1440, height: 900 });
+      const titlesMatch = cardDetails.length === 4 && cardDetails.every((c, i) => c.title === expectedTitles[i]);
+      const descsMatch = cardDetails.length === 4 && cardDetails.every((c, i) => c.desc === expectedDescriptions[i]);
+      const badgesMatch = cardDetails.length === 4 && cardDetails.every(c => c.hasBadge && c.hasIcon);
 
-    // 5.2 Teste Interativo da Matriz de Sintomas (Symptom Checker) por Clique e Teclado
-    console.log('5.2 Testando Interatividade da Matriz de Sintomas (Symptom Checker)...');
-    
-    // Teste por clique no Sinal 2
-    await page.click('#symptom-tab-2');
-    await new Promise(r => setTimeout(r, 100));
-    const clickSymptomAudit = await page.evaluate(() => {
-      const tab2 = document.getElementById('symptom-tab-2');
-      const activeTitle = document.getElementById('panelActiveTitle').innerText.trim();
-      const dailyText = document.getElementById('panelDailyText').innerText.trim();
-      return {
-        tab2Active: tab2.classList.contains('active'),
-        tab2Selected: tab2.getAttribute('aria-selected') === 'true',
-        activeTitleMatches: activeTitle.includes('calçar ou amarrar o sapato'),
-        dailyTextValid: dailyText.length > 20
-      };
-    });
-    console.log('Auditoria de Clique na Matriz de Sintomas:', clickSymptomAudit);
-    if (!clickSymptomAudit.tab2Active || !clickSymptomAudit.activeTitleMatches) {
-      throw new Error('Falha no clique da Matriz de Sintomas: o painel de leitura não atualizou para o sinal 2.');
-    }
+      const html = document.body.innerHTML;
+      const hasOldBloat = html.includes('Leitura Biomecânica') ||
+                          html.includes('Situação no Dia a Dia') ||
+                          html.includes('O que a Coluna Avisa') ||
+                          html.includes('Impacto se Ignorado') ||
+                          html.includes('Conduta Presencial') ||
+                          !!document.getElementById('symptomProgressFill') ||
+                          !!document.getElementById('symptomAssessmentPanel');
 
-    // Teste por teclado (ArrowRight para Sinal 3 e ArrowLeft para Sinal 2)
-    await page.focus('#symptom-tab-2');
-    await page.keyboard.press('ArrowRight');
-    await new Promise(r => setTimeout(r, 100));
-    const keyRightAudit = await page.evaluate(() => {
-      const tab3 = document.getElementById('symptom-tab-3');
-      const activeTitle = document.getElementById('panelActiveTitle').innerText.trim();
-      return {
-        tab3Active: tab3.classList.contains('active'),
-        activeTitleMatches: activeTitle.includes('permanecer sentado')
-      };
-    });
-    console.log('Auditoria de Teclado ArrowRight (Sinal 3):', keyRightAudit);
-    if (!keyRightAudit.tab3Active || !keyRightAudit.activeTitleMatches) {
-      throw new Error('Falha de acessibilidade por teclado: ArrowRight não ativou o sinal 3.');
-    }
-
-    await page.keyboard.press('ArrowLeft');
-    await new Promise(r => setTimeout(r, 100));
-    const keyLeftAudit = await page.evaluate(() => {
-      const tab2 = document.getElementById('symptom-tab-2');
-      const activeTitle = document.getElementById('panelActiveTitle').innerText.trim();
-      return {
-        tab2Active: tab2.classList.contains('active'),
-        activeTitleMatches: activeTitle.includes('calçar ou amarrar o sapato')
-      };
-    });
-    console.log('Auditoria de Teclado ArrowLeft (Sinal 2):', keyLeftAudit);
-    if (!keyLeftAudit.tab2Active || !keyLeftAudit.activeTitleMatches) {
-      throw new Error('Falha de acessibilidade por teclado: ArrowLeft não retornou ao sinal 2.');
-    }
-
-    // 5.2.1 Teste de Seleção de Múltiplos Sinais e Contador Interativo
-    console.log('5.2.1 Auditando Contador Dinâmico de Múltiplos Sinais...');
-    // Clica no indicador de marcação do Sinal 3
-    await page.click('#symptom-tab-3 .symptom-check-indicator');
-    await new Promise(r => setTimeout(r, 100));
-
-    // Clica no indicador de marcação do Sinal 4
-    await page.click('#symptom-tab-4 .symptom-check-indicator');
-    await new Promise(r => setTimeout(r, 100));
-
-    const multiSymptomAudit = await page.evaluate(() => {
-      const badge = document.getElementById('symptomCountBadge').innerText.trim();
-      const progress = document.getElementById('symptomProgressFill').style.width;
-      const severity = document.getElementById('symptomSeverityText').innerText.trim();
-      const ctaBtn = document.getElementById('symptomCtaButton');
-      const ctaHref = ctaBtn ? ctaBtn.href : '';
+      const isCtaCorrect = ctaText.includes('Sentindo esses sinais? Agende sua avaliação preventiva');
+      const ctaHasWpp = ctaBtn ? (ctaBtn.href.includes('whatsapp') || ctaBtn.dataset.wixTag === '{linkWpp}') : false;
 
       return {
-        badge,
-        progress,
-        severity,
-        ctaHref,
-        isMultiCountValid: badge.includes('4 de 4 sinais identificados') || badge.includes('3 de 4 sinais identificados'),
-        hasNoExclamation: !ctaHref.includes('!') && !ctaHref.includes('%21'),
-        mentionsIdentifiedCount: ctaHref.includes('sinais')
+        hasGrid: !!grid,
+        totalCards: cards.length,
+        titlesMatch,
+        descsMatch,
+        badgesMatch,
+        hasOldBloat,
+        isCtaCorrect,
+        ctaHasWpp,
+        cardDetails
       };
     });
-    console.log('Auditoria do Contador de Múltiplos Sinais:', multiSymptomAudit);
+    console.log('Auditoria do Repeater de Sintomas:', symptomsAudit);
+    if (!symptomsAudit.hasGrid || symptomsAudit.totalCards !== 4) {
+      throw new Error(`Dobra 2 deve possuir exatamente 4 cards no repeater, encontrado: ${symptomsAudit.totalCards}`);
+    }
+    if (!symptomsAudit.titlesMatch || !symptomsAudit.descsMatch || !symptomsAudit.badgesMatch) {
+      throw new Error('Divergência nos títulos, descrições ou badges dos 4 cards de sintomas.');
+    }
+    if (symptomsAudit.hasOldBloat) {
+      throw new Error('VIOLAÇÃO: Dobra 2 ainda contém texto denso de "prontuário médico" (Leitura Biomecânica, Impacto, etc.) ou painel antigo.');
+    }
+    if (!symptomsAudit.isCtaCorrect || !symptomsAudit.ctaHasWpp) {
+      throw new Error('CTA de sintomas incorreto ou não conectado ao WhatsApp.');
+    }
 
-    if (!multiSymptomAudit.isMultiCountValid) {
-      throw new Error(`Falha no contador de múltiplos sinais: badge retornou "${multiSymptomAudit.badge}"`);
-    }
-    if (!multiSymptomAudit.hasNoExclamation) {
-      throw new Error('Falha de compliance: CTA da matriz de sintomas contém exclamação.');
-    }
-    if (!multiSymptomAudit.mentionsIdentifiedCount) {
-      throw new Error('Falha no link do WhatsApp: não incluiu os sinais identificados na mensagem pré-preenchida.');
-    }
-
-    // 5.2.2 Teste de Interação por Toque Tátil Mobile (Touch Tap)
-    await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-    await page.tap('#symptom-tab-1');
+    // Teste de clique visual interativo no card de sintoma
+    await page.click('.symptom-visual-card:nth-child(2)');
     await new Promise(r => setTimeout(r, 100));
-    const mobileTouchAudit = await page.evaluate(() => {
-      const tab1 = document.getElementById('symptom-tab-1');
-      const activeTitle = document.getElementById('panelActiveTitle').innerText.trim();
-      return {
-        tab1Active: tab1.classList.contains('active'),
-        activeTitleMatches: activeTitle.includes('levantar da cama')
-      };
+    const cardSelectedCheck = await page.evaluate(() => {
+      const card2 = document.querySelector('.symptom-visual-card:nth-child(2)');
+      return card2 ? (card2.classList.contains('selected') || card2.classList.contains('is-selected')) : false;
     });
-    console.log('Auditoria de Touch Tap Mobile na Matriz de Sintomas:', mobileTouchAudit);
-    if (!mobileTouchAudit.tab1Active || !mobileTouchAudit.activeTitleMatches) {
-      throw new Error('Falha na interação por toque (tap) mobile na Matriz de Sintomas.');
+    console.log('Teste de seleção visual do card 2:', cardSelectedCheck);
+    if (!cardSelectedCheck) {
+      throw new Error('Card de sintoma deve receber classe .selected ao ser clicado.');
     }
 
-    // Restaura viewport desktop 1440
-    await page.setViewport({ width: 1440, height: 900 });
-
-    // 5.3 Auditoria do Founder Spotlight (Foto, Pull-Quote sem itálico, Timeline e Vídeo)
-    console.log('5.3 Auditando Founder Spotlight...');
+    // 5.3 Auditoria dos Fundadores (Foto, Citação sem itálico, 3 Stats e Vídeo - Zero Timeline e Zero 3 Pilares)
+    console.log('5.3 Auditando Seção dos Fundadores...');
     const founderAudit = await page.evaluate(() => {
-      const spotlight = document.querySelector('.founder-spotlight-card');
-      const photo = spotlight ? spotlight.querySelector('img[src*="doutores-fundadores"]') : null;
-      const pullQuote = document.querySelector('.founder-pull-quote');
+      const section = document.querySelector('.founder-video-section');
+      const photo = section ? section.querySelector('img[src*="doutores-fundadores"]') : null;
+      const pullQuote = section ? section.querySelector('.founder-pull-quote') : null;
       const quoteText = pullQuote ? pullQuote.querySelector('.founder-quote-text') : null;
       const quoteStyle = quoteText ? window.getComputedStyle(quoteText) : null;
-      const timelineMilestones = Array.from(document.querySelectorAll('.timeline-milestone')).map(m => m.innerText);
-      const has2005 = timelineMilestones.some(m => m.includes('2005'));
-      const has2012 = timelineMilestones.some(m => m.includes('2012'));
-      const has2026 = timelineMilestones.some(m => m.includes('2026'));
-      const videoContainer = document.querySelector('#founderVideoContainer');
+      
+      const stats = Array.from(document.querySelectorAll('.founder-stat-item'));
+      const statsText = stats.map(s => s.innerText.trim());
+      const has350 = statsText.some(t => t.includes('+350 Clínicas'));
+      const has3M = statsText.some(t => t.includes('+3 Milhões'));
+      const has95 = statsText.some(t => t.includes('95,7%'));
+
+      const videoFrame = document.querySelector('#founderVideoContainer');
+      const iframe = videoFrame ? videoFrame.querySelector('iframe') : null;
+      const videoTitle = document.querySelector('.founder-video-title');
+      const videoTitleText = videoTitle ? videoTitle.innerText.trim() : '';
+
+      const html = section ? section.innerHTML : '';
+      const hasTimeline = html.includes('timeline-milestone') || html.includes('2005') || html.includes('2012');
+      const hasThreePillars = html.includes('Pilar 01') || html.includes('Pilar 02') || html.includes('video-scientific-pillars');
+
+      const twoColGrid = section ? section.querySelector('.founder-two-col-grid') : null;
+      const col1 = section ? section.querySelector('.founder-info-column') : null;
+      const col2 = section ? section.querySelector('.founder-video-column') : null;
+      const gridStyle = twoColGrid ? window.getComputedStyle(twoColGrid) : null;
+      const col1Rect = col1 ? col1.getBoundingClientRect() : null;
+      const col2Rect = col2 ? col2.getBoundingClientRect() : null;
+      const videoFrameRect = videoFrame ? videoFrame.getBoundingClientRect() : null;
+
+      const isTwoColGrid = gridStyle ? (gridStyle.display === 'grid' && gridStyle.gridTemplateColumns.split(' ').length === 2) : false;
+      const isSideBySide = (col1Rect && col2Rect) ? (col1Rect.left < col2Rect.left && Math.abs(col1Rect.top - col2Rect.top) < 25 && col1Rect.width < 800 && col2Rect.width < 800) : false;
+      const hasProperVideoHeight = videoFrameRect ? videoFrameRect.height >= 200 : false;
 
       return {
-        hasSpotlight: !!spotlight,
+        hasSection: !!section,
         hasPhoto: !!photo,
         hasPullQuote: !!pullQuote,
         isItalic: quoteStyle ? quoteStyle.fontStyle === 'italic' : false,
-        timelineComplete: has2005 && has2012 && has2026,
-        hasVideoContainer: !!videoContainer
+        statsCount: stats.length,
+        hasAllStats: has350 && has3M && has95,
+        hasVideo: !!iframe,
+        videoTitleText,
+        hasTimeline,
+        hasThreePillars,
+        isTwoColGrid,
+        isSideBySide,
+        hasProperVideoHeight
       };
     });
-    console.log('Auditoria do Founder Spotlight:', founderAudit);
-    if (!founderAudit.hasSpotlight || !founderAudit.hasPhoto || !founderAudit.hasPullQuote) {
-      throw new Error('Founder Spotlight ausente ou incompleto.');
+    console.log('Auditoria dos Fundadores:', founderAudit);
+    if (!founderAudit.hasSection || !founderAudit.hasPhoto || !founderAudit.hasPullQuote) {
+      throw new Error('Seção dos fundadores incompleta (foto ou citação ausente).');
+    }
+    if (!founderAudit.isTwoColGrid || !founderAudit.isSideBySide) {
+      throw new Error('VIOLAÇÃO DE LAYOUT: Seção dos fundadores não está renderizando em 2 colunas equilibradas (1fr 1fr) lado a lado no desktop.');
+    }
+    if (!founderAudit.hasProperVideoHeight) {
+      throw new Error('VIOLAÇÃO: O player de vídeo dos fundadores está com altura insuficiente ou esmagada.');
     }
     if (founderAudit.isItalic) {
-      throw new Error('VIOLAÇÃO DE DESIGN: Pull-quote dos fundadores está em itálico. Regra de design exige zero itálico.');
+      throw new Error('VIOLAÇÃO DE DESIGN: Citação dos fundadores está em itálico. Regra de design exige zero itálico.');
     }
-    if (!founderAudit.timelineComplete) {
-      throw new Error('Timeline dos fundadores incompleta (deve conter marcos de 2005, 2012 e 2026).');
+    if (founderAudit.statsCount !== 3 || !founderAudit.hasAllStats) {
+      throw new Error('3 dados de autoridade (+350 Clínicas, +3 Milhões, 95,7%) ausentes ou incorretos.');
+    }
+    if (!founderAudit.hasVideo) {
+      throw new Error('Vídeo dos fundadores ausente.');
+    }
+    if (founderAudit.hasTimeline) {
+      throw new Error('VIOLAÇÃO: Linha do tempo (2005/2012/2026) ainda está presente na seção dos fundadores.');
+    }
+    if (founderAudit.hasThreePillars) {
+      throw new Error('VIOLAÇÃO: 3 pilares de texto ainda estão presentes na seção dos fundadores.');
     }
 
-    // 5.4 Auditoria das Histórias de Recuperação (Casos Humanos com Antes vs Hoje e Zero Itálico)
+    // 5.4 Auditoria das Histórias de Recuperação (Casos Clínicos Leves: Vídeo, Tag, Citação Direta, Paciente e Zero Itálico)
     console.log('5.4 Auditando Histórias de Recuperação...');
     const casesAudit = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('.testimonial-video-card'));
@@ -537,21 +607,29 @@ const fs = require('fs');
         });
       });
 
-      const comparisons = cards.map((c, idx) => {
-        const before = c.querySelector('.case-before');
-        const after = c.querySelector('.case-after');
+      const cardData = cards.map((c, idx) => {
+        const video = c.querySelector('.testimonial-media-wrap iframe, .testimonial-media-wrap .video-poster-overlay');
         const profile = c.querySelector('.case-study-profile');
+        const quote = c.querySelector('.testimonial-quote-text');
+        const patientRow = c.querySelector('.testimonial-patient-row');
+        const verified = c.querySelector('.patient-verified-badge');
+        const hasBefore = !!c.querySelector('.case-before');
+        const hasAfter = !!c.querySelector('.case-after');
         return {
           card: idx + 1,
-          hasBefore: !!before,
-          hasAfter: !!after,
-          hasProfile: !!profile
+          hasVideo: !!video,
+          hasProfile: !!profile,
+          hasQuote: !!quote,
+          hasPatientRow: !!patientRow,
+          hasVerified: !!verified,
+          hasBefore,
+          hasAfter
         };
       });
 
       return {
         totalCards: cards.length,
-        comparisons,
+        cardData,
         hasItalic: italicElements.length > 0,
         italicElements
       };
@@ -560,12 +638,16 @@ const fs = require('fs');
     if (casesAudit.totalCards !== 3) {
       throw new Error(`Número incorreto de cartões de histórias de recuperação: ${casesAudit.totalCards} (esperado: 3).`);
     }
-    const incompleteCases = casesAudit.comparisons.filter(c => !c.hasBefore || !c.hasAfter || !c.hasProfile);
-    if (incompleteCases.length > 0) {
-      throw new Error('Casos de recuperação incompletos (devem conter perfil e comparativo "Como estava antes" vs "Como vive hoje").');
+    const invalidCards = casesAudit.cardData.filter(c => !c.hasVideo || !c.hasProfile || !c.hasQuote || !c.hasPatientRow || !c.hasVerified);
+    if (invalidCards.length > 0) {
+      throw new Error('Cards de depoimento devem conter vídeo, perfil, citação, paciente e selo verificado.');
+    }
+    const hasOldComparisons = casesAudit.cardData.some(c => c.hasBefore || c.hasAfter);
+    if (hasOldComparisons) {
+      throw new Error('VIOLAÇÃO: Cards de depoimento ainda contêm os blocos pesados "Como estava antes" / "Como vive hoje".');
     }
     if (casesAudit.hasItalic) {
-      throw new Error(`VIOLAÇÃO DE DESIGN: Encontrados elementos em itálico nos depoimentos:\n${casesAudit.italicElements.join('\n')}`);
+      throw new Error('VIOLAÇÃO DE DESIGN: Encontrados elementos em itálico nos depoimentos:\n' + casesAudit.italicElements.join('\n'));
     }
 
     // 6. Auditoria de CTAs: VETO ABSOLUTO AO VERMELHO
@@ -656,15 +738,21 @@ const fs = require('fs');
       const rawHtml = document.documentElement.outerHTML;
       const violations = [];
 
+      // Isenção explícita autorizada para as duas frases literais exigidas pelo usuário:
+      const sanitizedText = text
+        .replace(/sua\s+coluna\s+j[aá]\s+avisou/gi, '')
+        .replace(/agende\s+sua\s+avalia[cç][aã]o\s+preventiva/gi, '');
+
       // Veto a atributos pessoais em 2ª pessoa
-      if (/\bsua dor\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "sua dor"');
-      if (/\bseu corpo\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "seu corpo"');
-      if (/\bsua rotina\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "sua rotina"');
-      if (/\bseu quadro\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "seu quadro"');
-      if (/\bsua coluna\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "sua coluna"');
-      if (/\bseu problema\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "seu problema"');
-      if (/\bseus sintomas\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "seus sintomas"');
-      if (/\bsuas?\s+atividades\b/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "suas atividades"');
+      if (/\bsua dor\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "sua dor"');
+      if (/\bseu corpo\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "seu corpo"');
+      if (/\bsua rotina\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "sua rotina"');
+      if (/\bseu quadro\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "seu quadro"');
+      if (/\bsua coluna\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "sua coluna"');
+      if (/\bseu problema\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "seu problema"');
+      if (/\bseus sintomas\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "seus sintomas"');
+      if (/\bsuas?\s+atividades\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "suas atividades"');
+      if (/\bsua\s+avalia[cç][aã]o\b/i.test(sanitizedText)) violations.push('VIOLAÇÃO: Encontrado "sua avaliação"');
 
       // Veto a promessas absolutas
       if (/viver sem dor/i.test(text)) violations.push('VIOLAÇÃO: Encontrado "viver sem dor"');
