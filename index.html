@@ -284,7 +284,7 @@
 
         <div class="founder-two-col-grid" data-wix-component="Grid">
           
-          <!-- Coluna 1 (Fundadores + Citação Curta de Liderança) -->
+          <!-- Coluna da Esquerda: Foto Oficial dos Fundadores + Citação de 2 Linhas + 3 Selos de Autoridade -->
           <div class="founder-info-column" data-wix-component="Stack">
             <div class="founder-spotlight-card" data-wix-component="Card">
               <div class="founder-photo-frame">
@@ -303,50 +303,11 @@
 
             <div class="founder-pull-quote">
               <blockquote class="founder-quote-text">
-                "Mais de 20 anos dedicados ao desenvolvimento do protocolo pioneiro de reabilitação da coluna sem cirurgia."
+                "Há mais de 20 anos desenvolvemos um protocolo não cirúrgico focado em recuperar a função da coluna com precisão clínica."
               </blockquote>
-              <cite class="founder-quote-cite">
-                Dr. André Pêgas de Oliveira e Dr. Laudelino Risso, Fundadores
-              </cite>
-            </div>
-          </div>
-
-          <!-- Coluna 2 (Vídeo Oficial Enxuto + 3 Dados de Autoridade ao Lado) -->
-          <div class="founder-video-column" data-wix-component="Stack">
-            <div class="founder-video-header">
-              <h3 class="founder-video-title">Assista: Como funciona a descompressão vertebral sem cirurgia</h3>
             </div>
 
-            <div class="video-editorial-frame" 
-                 id="founderVideoContainer" 
-                 data-wix-dataset="Franquias" 
-                 data-wix-field="video_youtube_pq_dores_costas" 
-                 data-wix-tag="{video_youtube_pq_dores_costas}">
-              
-              <div class="video-poster-overlay" 
-                   style="background-image: url('https://img.youtube.com/vi/2IJ4v6u60bk/maxresdefault.jpg');"
-                   onclick="loadVideo(this.parentElement, '2IJ4v6u60bk', 'Vídeo dos Fundadores - Como Funciona o Método Doutor Hérnia')"
-                   onkeydown="handleVideoKey(event, this.parentElement, '2IJ4v6u60bk', 'Vídeo dos Fundadores - Como Funciona o Método Doutor Hérnia')"
-                   role="button" 
-                   tabindex="0" 
-                   aria-label="Assistir explicação dos fundadores sobre o tratamento da coluna">
-                <div class="video-play-btn" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M8 5V19L19 12L8 5Z"/>
-                  </svg>
-                </div>
-              </div>
-
-              <iframe src="https://www.youtube.com/embed/2IJ4v6u60bk?rel=0" 
-                      class="video-iframe"
-                      title="Vídeo dos Fundadores - Método Doutor Hérnia" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                      referrerpolicy="strict-origin-when-cross-origin" 
-                      allowfullscreen>
-              </iframe>
-            </div>
-
-            <!-- Grid Horizontal de 3 Dados de Autoridade -->
+            <!-- Grid Horizontal de 3 Selos de Autoridade -->
             <div class="founder-authority-stats" data-wix-component="Grid">
               <div class="founder-stat-item">
                 <span class="stat-number">+350 Clínicas</span>
@@ -354,12 +315,55 @@
               </div>
               <div class="founder-stat-item">
                 <span class="stat-number">+3 Milhões</span>
-                <span class="stat-desc">De Atendimentos</span>
+                <span class="stat-desc">de Atendimentos</span>
               </div>
               <div class="founder-stat-item">
                 <span class="stat-number">95,7%</span>
-                <span class="stat-desc">De Eficácia Clínica</span>
+                <span class="stat-desc">de Eficácia</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Coluna da Direita: Card do Vídeo Explicativo do Documentário Clínico dos Fundadores -->
+          <div class="founder-video-column" data-wix-component="Stack">
+            <div class="founder-video-card" data-wix-component="Card">
+              <div class="founder-video-header">
+                <span class="founder-video-kicker">Documentário Clínico</span>
+                <h3 class="founder-video-title">Como funciona a descompressão vertebral sem cirurgia</h3>
+              </div>
+
+              <div class="video-editorial-frame" 
+                   id="founderVideoContainer" 
+                   data-wix-dataset="Franquias" 
+                   data-wix-field="video_youtube_pq_dores_costas" 
+                   data-wix-tag="{video_youtube_pq_dores_costas}">
+                
+                <div class="video-poster-overlay" 
+                     style="background-image: url('https://img.youtube.com/vi/2IJ4v6u60bk/maxresdefault.jpg');"
+                     onclick="loadVideo(this.parentElement, '2IJ4v6u60bk', 'Vídeo dos Fundadores - Como Funciona o Método Doutor Hérnia')"
+                     onkeydown="handleVideoKey(event, this.parentElement, '2IJ4v6u60bk', 'Vídeo dos Fundadores - Como Funciona o Método Doutor Hérnia')"
+                     role="button" 
+                     tabindex="0" 
+                     aria-label="Assistir explicação dos fundadores sobre o tratamento da coluna">
+                  <div class="video-play-btn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M8 5V19L19 12L8 5Z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <iframe src="https://www.youtube.com/embed/2IJ4v6u60bk?rel=0" 
+                        class="video-iframe"
+                        title="Vídeo dos Fundadores - Método Doutor Hérnia" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                </iframe>
+              </div>
+
+              <p class="founder-video-caption">
+                Explicação clínica apresentada pelos fundadores sobre a reabilitação discal sem cirurgia.
+              </p>
             </div>
           </div>
 

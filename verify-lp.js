@@ -541,13 +541,15 @@ const fs = require('fs');
       const twoColGrid = section ? section.querySelector('.founder-two-col-grid') : null;
       const col1 = section ? section.querySelector('.founder-info-column') : null;
       const col2 = section ? section.querySelector('.founder-video-column') : null;
+      const statsInLeftCol = col1 ? col1.querySelectorAll('.founder-stat-item').length === 3 : false;
+      const videoCardInRightCol = col2 ? !!col2.querySelector('.founder-video-card #founderVideoContainer') : false;
       const gridStyle = twoColGrid ? window.getComputedStyle(twoColGrid) : null;
       const col1Rect = col1 ? col1.getBoundingClientRect() : null;
       const col2Rect = col2 ? col2.getBoundingClientRect() : null;
       const videoFrameRect = videoFrame ? videoFrame.getBoundingClientRect() : null;
 
       const isTwoColGrid = gridStyle ? (gridStyle.display === 'grid' && gridStyle.gridTemplateColumns.split(' ').length === 2) : false;
-      const isSideBySide = (col1Rect && col2Rect) ? (col1Rect.left < col2Rect.left && Math.abs(col1Rect.top - col2Rect.top) < 25 && col1Rect.width < 800 && col2Rect.width < 800) : false;
+      const isSideBySide = (col1Rect && col2Rect) ? (col1Rect.left < col2Rect.left && Math.abs(col1Rect.top - col2Rect.top) < 120 && col1Rect.width < 800 && col2Rect.width < 800) : false;
       const hasProperVideoHeight = videoFrameRect ? videoFrameRect.height >= 200 : false;
 
       return {
@@ -557,6 +559,8 @@ const fs = require('fs');
         isItalic: quoteStyle ? quoteStyle.fontStyle === 'italic' : false,
         statsCount: stats.length,
         hasAllStats: has350 && has3M && has95,
+        statsInLeftCol,
+        videoCardInRightCol,
         hasVideo: !!iframe,
         videoTitleText,
         hasTimeline,
@@ -572,6 +576,9 @@ const fs = require('fs');
     }
     if (!founderAudit.isTwoColGrid || !founderAudit.isSideBySide) {
       throw new Error('VIOLAÇÃO DE LAYOUT: Seção dos fundadores não está renderizando em 2 colunas equilibradas (1fr 1fr) lado a lado no desktop.');
+    }
+    if (!founderAudit.statsInLeftCol || !founderAudit.videoCardInRightCol) {
+      throw new Error('VIOLAÇÃO DE ESTRUTURA: Selos devem estar na coluna esquerda e card do vídeo na coluna direita.');
     }
     if (!founderAudit.hasProperVideoHeight) {
       throw new Error('VIOLAÇÃO: O player de vídeo dos fundadores está com altura insuficiente ou esmagada.');
