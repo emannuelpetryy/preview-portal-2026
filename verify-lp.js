@@ -935,6 +935,7 @@ const fs = require('fs');
 
     const dynamicAudit = await page.evaluate(() => {
       const headerTitle = document.querySelector('.site-header .unit-dynamic-pill .wix-field-marker').textContent;
+      const heroDynamicCity = document.querySelector('.hero-title .hero-dynamic-city')?.textContent?.trim();
       const headerHeight = document.querySelector('.site-header').offsetHeight;
       const dockTitle = document.querySelector('.mobile-unit-title').textContent;
       const enderecoText = document.querySelector('[data-wix-tag="{endereoTexto}"]').textContent;
@@ -942,6 +943,7 @@ const fs = require('fs');
 
       return {
         headerTitle,
+        heroDynamicCity,
         headerHeight,
         dockTitle,
         enderecoText,
@@ -949,6 +951,10 @@ const fs = require('fs');
       };
     });
     console.log('Auditoria do Teste de Borda Dinâmico:', dynamicAudit);
+
+    if (dynamicAudit.heroDynamicCity !== 'Presidente Prudente e São José do Rio Preto - SP') {
+      throw new Error(`Cidade dinâmica do Hero não formatou corretamente: ${dynamicAudit.heroDynamicCity}`);
+    }
 
     if (!dynamicAudit.headerTitle.includes('PRESIDENTE PRUDENTE')) {
       throw new Error('Parâmetro dinâmico da unidade não refletiu no cabeçalho.');
