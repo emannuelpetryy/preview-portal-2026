@@ -1840,8 +1840,9 @@ body.show-wix-tags [data-wix-tag]::after {
 .mobile-dock-unit-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
-  max-width: 58%;
 }
 
 .mobile-unit-title {
@@ -1956,34 +1957,90 @@ body.show-wix-tags [data-wix-tag]::after {
   }
 
   .hero-block {
-    padding-top: 28px;
-    padding-bottom: 32px;
+    padding-top: 14px;
+    padding-bottom: 24px;
+  }
+
+  .hero-kicker-stack {
+    margin-bottom: 10px;
+    max-width: 100%;
+  }
+
+  .hero-block .section-badge-pill {
+    font-size: 0.68rem;
+    gap: 6px;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .kicker-extra {
+    display: none;
   }
 
   .hero-title {
-    font-size: 1.75rem;
-    line-height: 1.22;
-    margin-bottom: 14px;
+    font-size: clamp(1.28rem, 4.8vw, 1.52rem);
+    line-height: 1.16;
+    margin-bottom: 8px;
+    text-wrap: balance;
   }
 
   .hero-subtitle {
-    font-size: 0.98rem;
-    line-height: 1.55;
-    margin-bottom: 20px;
+    font-size: 0.88rem;
+    line-height: 1.44;
+    margin-bottom: 14px;
+  }
+
+  .hero-cta-group {
+    gap: 8px;
+    margin-bottom: 0;
+    width: 100%;
+  }
+
+  .hero-center-stack .btn-hero-primary {
+    width: 100%;
+    max-width: 340px;
+    padding: 12px 16px;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    gap: 8px;
+  }
+
+  .cta-banner-action-wrap .btn-hero-primary {
+    width: 100%;
+    max-width: 100%;
+    padding: 13px 16px;
+    white-space: normal;
+  }
+
+  .hero-trust-badge {
+    font-size: clamp(0.60rem, 2.7vw, 0.68rem);
+    line-height: 1.3;
+    gap: 5px;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  body.show-wix-tags .btn-hero-primary,
+  body.show-wix-tags .hero-trust-badge,
+  body.show-wix-tags .hero-block .section-badge-pill {
+    white-space: normal;
+    flex-wrap: wrap;
   }
 
   .hero-panoramic-frame {
-    margin-top: 24px;
+    margin-top: 16px;
     border-radius: 12px;
   }
 
   .hero-panoramic-img {
-    height: 200px;
+    height: 168px;
+    object-position: 28% 35%;
   }
 
   .hero-panoramic-caption {
-    font-size: 0.78rem;
-    padding: 16px 14px 10px;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    padding: 16px 12px 9px;
   }
 
   .symptoms-repeater-grid {
@@ -2033,6 +2090,12 @@ body.show-wix-tags [data-wix-tag]::after {
   }
   
   .cms-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cms-collection-pill {
     display: none;
   }
   
@@ -2040,5 +2103,44 @@ body.show-wix-tags [data-wix-tag]::after {
     margin-left: auto;
     font-size: 0.7rem;
     padding: 3px 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .wix-cms-toolbar {
+    padding: 0 8px;
+  }
+
+  .cms-live-badge {
+    font-size: 0.58rem;
+    padding: 2px 5px;
+    white-space: nowrap;
+  }
+
+  .cms-toggle-btn {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  .hero-block .section-badge-pill {
+    font-size: 0.62rem;
+    white-space: normal;
+  }
+
+  .hero-trust-badge {
+    white-space: normal;
+    width: fit-content;
+    text-align: left;
+  }
+
+  .hero-center-stack .btn-hero-primary {
+    font-size: 0.84rem;
+    padding: 11px 12px;
+  }
+
+  .mobile-dock-btn {
+    padding: 8px 10px;
+    font-size: 0.72rem;
   }
 }

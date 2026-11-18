@@ -96,7 +96,8 @@ const fs = require('fs');
 
     // 4. Teste e Captura Viewport Mobile (iPhone 14/15 390x844)
     await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await new Promise(r => setTimeout(r, 100));
 
     const mobileScreenPath = 'C:/Users/Usuario/Downloads/Antigravity/Projetos/lp-coluna-autoridade/preview-mobile-screen.png';
     await page.screenshot({ path: mobileScreenPath, fullPage: false });
